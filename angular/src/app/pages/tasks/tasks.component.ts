@@ -205,12 +205,29 @@ export class TasksComponent {
   }
 
   async handleModalSubmit(data: { title: string; description: string }): Promise<void> {
-    if (this.modalMode() === 'create') {
-      await this.taskService.createTask(data);
-    } else if (this.modalMode() === 'edit' && this.selectedTask()) {
-      await this.taskService.updateTask(this.selectedTask()!.id, data);
-    }
     this.modalOpen.set(false);
+    const mode = this.modalMode();
+    const selected = this.selectedTask();
+
+    try {
+      if (mode === 'create') {
+        await this.taskService.createTask(data);
+      } else if (mode === 'edit' && selected) {
+        await this.taskService.updateTask(selected.id, data);
+      }
+    } catch (error) {
+      // Em caso de falha, reabre o modal para o usuário tentar novamente.
+      console.error(error);
+      alert('Não foi possível salvar a tarefa. Tente novamente.');
+      if (mode === 'edit') {
+        this.selectedTask.set(selected);
+        this.modalMode.set('edit');
+      } else {
+        this.selectedTask.set(null);
+        this.modalMode.set('create');
+      }
+      this.modalOpen.set(true);
+    }
   }
 
   async toggleStatus(task: Task): Promise<void> {
