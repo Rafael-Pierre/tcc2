@@ -69,70 +69,75 @@ type Filter = 'all' | TaskStatus;
             />
           </div>
 
-          <span class="muted-text" *ngIf="summary() as s">
-            Total: {{ s.total }} • Pendentes: {{ s.pending }} • Concluídas: {{ s.completed }}
-          </span>
+          @if (summary(); as s) {
+            <span class="muted-text">
+              Total: {{ s.total }} • Pendentes: {{ s.pending }} • Concluídas: {{ s.completed }}
+            </span>
+          }
         </div>
 
         <div class="tasks-list">
-          <div class="tasks-list-empty" *ngIf="taskService.loading()">
-            Carregando tarefas simuladas...
-          </div>
-
-          <div class="tasks-list-empty" *ngIf="!taskService.loading() && visibleTasks().length === 0">
-            Nenhuma tarefa encontrada com os filtros atuais.
-          </div>
-
-          <article
-            *ngFor="let task of visibleTasks()"
-            class="task-row"
-            [class.is-completed]="task.status === 'completed'"
-          >
-            <button
-              type="button"
-              class="task-toggle"
-              [class.is-completed]="task.status === 'completed'"
-              (click)="toggleStatus(task)"
-              [attr.aria-label]="
-                task.status === 'completed'
-                  ? 'Marcar tarefa como pendente'
-                  : 'Marcar tarefa como concluída'
-              "
-            >
-              <span class="task-toggle-inner"></span>
-            </button>
-
-            <div class="task-main">
-              <div class="task-title">{{ task.title }}</div>
-              <div class="task-description">{{ task.description }}</div>
-              <div class="task-meta">
-                <span class="task-chip" [class.completed]="task.status === 'completed'" [class.pending]="task.status === 'pending'">
-                  {{ task.status === 'completed' ? 'Concluída' : 'Pendente' }}
-                </span>
-                <span>
-                  Criada em
-                  {{ task.createdAt | date: 'short' : undefined : 'pt-BR' }}
-                </span>
-              </div>
-            </div>
-
-            <div class="task-actions">
-              <button
-                type="button"
-                class="app-button app-button-neutral"
-                (click)="openEdit(task)"
+          @if (taskService.loading()) {
+            <div class="tasks-list-empty">Carregando tarefas simuladas...</div>
+          } @else if (visibleTasks().length === 0) {
+            <div class="tasks-list-empty">Nenhuma tarefa encontrada com os filtros atuais.</div>
+          } @else {
+            @for (task of visibleTasks(); track task.id) {
+              <article
+                class="task-row"
+                [class.is-completed]="task.status === 'completed'"
               >
-                Editar
-              </button>
-              <button
-                type="button"
-                class="app-button app-button-ghost"
-                (click)="delete(task)"
-              >
-                Excluir
-              </button>
-            </div>
-          </article>
+                <button
+                  type="button"
+                  class="task-toggle"
+                  [class.is-completed]="task.status === 'completed'"
+                  (click)="toggleStatus(task)"
+                  [attr.aria-label]="
+                    task.status === 'completed'
+                      ? 'Marcar tarefa como pendente'
+                      : 'Marcar tarefa como concluída'
+                  "
+                >
+                  <span class="task-toggle-inner"></span>
+                </button>
+
+                <div class="task-main">
+                  <div class="task-title">{{ task.title }}</div>
+                  <div class="task-description">{{ task.description }}</div>
+                  <div class="task-meta">
+                    <span
+                      class="task-chip"
+                      [class.completed]="task.status === 'completed'"
+                      [class.pending]="task.status === 'pending'"
+                    >
+                      {{ task.status === 'completed' ? 'Concluída' : 'Pendente' }}
+                    </span>
+                    <span>
+                      Criada em
+                      {{ task.createdAt | date: 'short' : undefined : 'pt-BR' }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="task-actions">
+                  <button
+                    type="button"
+                    class="app-button app-button-neutral"
+                    (click)="openEdit(task)"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    class="app-button app-button-ghost"
+                    (click)="delete(task)"
+                  >
+                    Excluir
+                  </button>
+                </div>
+              </article>
+            }
+          }
         </div>
       </div>
 
